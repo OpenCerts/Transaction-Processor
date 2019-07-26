@@ -84,7 +84,13 @@ DEBUG=consumer* node . processJobs REVOKE \
     <MULTISIG WALLET ADDRESS>
 ```
 
+## Test Results
+
+![Benchmark Test](./assets/queue.png)
+
+In a benchmark test on Ropsten, we are able to process `100` document issuance transactions in `1 minute 6 seconds`. In that test, we make use of `5` concurrent workers to process the job queue.
+
 ### Resources
 
-OpenAttestation DocumentStore Admin Panel - [admin.opencerts.io](https://admin.opencerts.io)
-Gnosis Multisig Wallet Admin Panel - [wallet.gnosis.pm](https://wallet.gnosis.pm)
+- OpenAttestation DocumentStore Admin Panel - [admin.opencerts.io](https://admin.opencerts.io)
+- Gnosis Multisig Wallet Admin Panel - [wallet.gnosis.pm](https://wallet.gnosis.pm)
