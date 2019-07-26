@@ -1,0 +1,23 @@
+{
+  "name": "scheduler",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "amqplib": "^0.5.3",
+    "axios": "^0.19.0",
+    "debug": "^4.1.1",
+    "ethers": "^4.0.33",
+    "jackrabbit": "^4.4.0",
+    "jest": "^24.8.0",
+    "js-sha3": "^0.8.0",
+    "lodash": "^4.17.15",
+    "uuid": "^3.3.2",
+    "yargs": "^13.3.0"
+  }
+}
