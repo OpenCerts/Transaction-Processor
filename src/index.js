@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 const yargs = require("yargs");
-const producer = require("./producer");
-const consumer = require("./consumer");
+const producer = require("./queue/producer");
+const consumer = require("./queue/consumer");
+const { spawnProcessors } = require("./processes/spawn");
 
 // Pass argv with $1 and $2 sliced
 const parseArguments = argv =>
@@ -69,6 +70,31 @@ const parseArguments = argv =>
             type: "string"
           })
     })
+    .command({
+      command:
+        "multiAccountProcessor <mode> <address> <multisigWallet> [options]",
+      description:
+        "Use multiple accounts from .secret/accounts.json file to process",
+      builder: sub =>
+        sub
+          .positional("mode", {
+            description: "To issue or revoke document",
+            choices: ["REVOKE", "ISSUE"]
+          })
+          .positional("address", {
+            description: "Contract address of documentStore",
+            default: "string"
+          })
+          .positional("privateKey", {
+            description: "Time between adding job (producer only)",
+            type: "string"
+          })
+          .positional("multisigWallet", {
+            description:
+              "Address of Gnosis Multisig Wallet controlling the DocumentStore",
+            type: "string"
+          })
+    })
     .parse(argv);
 
 const createJobs = async ({ mode, pollingTime, queueLimit }) => {
@@ -85,6 +111,17 @@ const processJobs = async ({
   await consumer({ mode, privateKey, network, address, multisigWallet });
 };
 
+const multiAccountProcessor = async ({ mode, address, multisigWallet, network }) => {
+  const accounts = require("../.secret/accounts.json");
+  await spawnProcessors({
+    accounts,
+    mode,
+    multisigWalletAddress: multisigWallet,
+    documentStoreAddress: address,
+    network
+  });
+};
+
 const main = async argv => {
   const args = parseArguments(argv);
 
@@ -98,6 +135,8 @@ const main = async argv => {
       return createJobs(args);
     case "processJobs":
       return processJobs(args);
+    case "multiAccountProcessor":
+      return multiAccountProcessor(args);
     default:
       throw new Error(`Unknown command ${args._[0]}. Possible bug.`);
   }
