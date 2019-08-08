@@ -26,7 +26,7 @@ const parseArguments = argv =>
       }
     })
     .command({
-      command: "createJobs [mode] [pollingTime] [options]",
+      command: "createJobs [mode] [pollingTime] [queueLimit] [options]",
       description: "Obfuscate fields in the certificate",
       builder: sub =>
         sub

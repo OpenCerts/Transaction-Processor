@@ -3,7 +3,7 @@ const fs = require("fs");
 const { createChannel, createConnection, decodeMessage } = require("../utils");
 const { MODE, RABBIT_CONNECTION_STRING } = require("../constants");
 const SimpleWallet = require("../wallet/simpleWallet");
-const MultisigWallet = require("../wallet/multisigWallet");
+const MultisigWallet = require("../wallet/bulkMultisigWallet");
 
 const log = debug("consumer");
 const RECORD_TO_FILE = true;
@@ -27,7 +27,7 @@ const run = async ({ mode, privateKey, network, address, multisigWallet }) => {
   const walletAddress = transactionProcessor.wallet.signingKey.address;
 
   // Allow this worker to process maximum of one transaction at a time
-  channel.prefetch(1);
+  channel.prefetch(128);
   channel.consume(mode, async msg => {
     try {
       const hashToProcess = decodeMessage(msg);
@@ -37,7 +37,7 @@ const run = async ({ mode, privateKey, network, address, multisigWallet }) => {
       if (RECORD_TO_FILE)
         fs.appendFileSync(
           `./log/${walletAddress}.txt`,
-          `${new Date()};${Date.now()};${txId}\n`
+          `${new Date()};${Date.now()};${hashToProcess};${txId}\n`
         );
       channel.ack(msg);
     } catch (e) {
