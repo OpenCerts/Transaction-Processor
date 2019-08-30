@@ -18,7 +18,7 @@ const parseArguments = argv =>
     )
     .options({
       network: {
-        choices: ["homestead", "ropsten"],
+        choices: ["homestead", "ropsten", "local"],
         default: "ropsten",
         description: "Network to perform transaction on",
         global: true,

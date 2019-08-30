@@ -4,10 +4,11 @@ const GnosisMultisigWalletABI = require("../../abi/GnosisMultisigWallet.json");
 
 class MultisigWallet {
   constructor({
-    network = "ropsten",
+    network,
     privateKey,
     walletAddress,
-    documentStoreAddress
+    documentStoreAddress,
+    waitForConfirmation
   } = {}) {
     this.network = network;
     this.privateKey = privateKey;
@@ -15,6 +16,7 @@ class MultisigWallet {
     this.documentStoreAddress = documentStoreAddress;
     this.provider = ethers.getDefaultProvider(network);
     this.wallet = new ethers.Wallet(privateKey, this.provider);
+    this.waitForConfirmation = waitForConfirmation;
 
     this.walletContract = new ethers.Contract(
       walletAddress,
@@ -24,7 +26,7 @@ class MultisigWallet {
     this.documentStoreInterface = new ethers.utils.Interface(DocumentStoreABI);
   }
 
-  async issue(hash, requireConfirmation = false) {
+  async issue(hash) {
     const transactionData = this.documentStoreInterface.functions.issue.encode([
       hash
     ]);
@@ -34,13 +36,13 @@ class MultisigWallet {
       valueToTranfer,
       transactionData
     );
-    if (requireConfirmation) {
+    if (this.waitForConfirmation) {
       await receipt.wait();
     }
     return receipt.hash;
   }
 
-  async revoke(hash, requireConfirmation = false) {
+  async revoke(hash) {
     const transactionData = this.documentStoreInterface.functions.revoke.encode(
       [hash]
     );
@@ -50,7 +52,7 @@ class MultisigWallet {
       valueToTranfer,
       transactionData
     );
-    if (requireConfirmation) {
+    if (this.waitForConfirmation) {
       await receipt.wait();
     }
     return receipt.hash;

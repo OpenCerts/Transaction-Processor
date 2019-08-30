@@ -2,21 +2,38 @@ const debug = require("debug");
 const fs = require("fs");
 const { createChannel, createConnection, decodeMessage } = require("../utils");
 const { MODE, RABBIT_CONNECTION_STRING } = require("../constants");
-const SimpleWallet = require("../wallet/simpleWallet");
-const MultisigWallet = require("../wallet/bulkMultisigWallet");
+
+// Using first version of the document store that is deployed on admin.opencerts.io
+const DSSimple = require("../documentStoreInterfaces/simple");
+// Using experimental version of document store that allows bulk issue/revoke using loop
+const DSBulk = require("../documentStoreInterfaces/bulk");
+// Using Gnosis multisig wallet to manage the first version of the document store
+const DSMultisig = require("../documentStoreInterfaces/simpleMultisig");
+// TBD: Using Gnosis multisig wallet to manage the experimental version of document store
 
 const log = debug("consumer");
-const RECORD_TO_FILE = true;
 
-const run = async ({ mode, privateKey, network, address, multisigWallet }) => {
+const run = async ({
+  mode,
+  privateKey,
+  network,
+  address,
+  multisigWallet,
+  waitForConfirmation = true,
+  maxTransactionsPerBlock = 128,
+  logToFile = true
+}) => {
   const transactionProcessor = multisigWallet
-    ? new MultisigWallet({
+    ? new DSMultisig({
         network,
         privateKey,
+        waitForConfirmation,
         walletAddress: multisigWallet,
         documentStoreAddress: address
       })
-    : new SimpleWallet({
+    : new DSBulk({
+        waitForConfirmation,
+        maxTransactionsPerBlock,
         privateKey,
         network,
         address
@@ -27,21 +44,21 @@ const run = async ({ mode, privateKey, network, address, multisigWallet }) => {
   const walletAddress = transactionProcessor.wallet.signingKey.address;
 
   // Allow this worker to process maximum of one transaction at a time
-  channel.prefetch(128);
+  channel.prefetch(maxTransactionsPerBlock);
   channel.consume(mode, async msg => {
     try {
       const hashToProcess = decodeMessage(msg);
       log(`${walletAddress}: ${hashToProcess}`);
       const txId = await transactionProcessor[contractMethod](hashToProcess);
       log(`Tx: ${txId}`);
-      if (RECORD_TO_FILE)
+      if (logToFile)
         fs.appendFileSync(
           `./log/${walletAddress}.txt`,
           `${new Date()};${Date.now()};${hashToProcess};${txId}\n`
         );
       channel.ack(msg);
     } catch (e) {
-      if (RECORD_TO_FILE)
+      if (logToFile)
         fs.appendFileSync(`./log/${walletAddress}.error.txt`, `${e.stack}\n`);
       channel.nack(msg);
     }

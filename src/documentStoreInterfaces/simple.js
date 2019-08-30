@@ -1,27 +1,29 @@
 const ethers = require("ethers");
+const { getProvider } = require("../utils");
 const DocumentStoreABI = require("../../abi/DocumentStore.json");
 
 class SimpleWallet {
-  constructor({ network = "ropsten", privateKey, address }) {
+  constructor({ network, privateKey, address, waitForConfirmation }) {
     this.network = network;
     this.privateKey = privateKey;
     this.address = address;
-    this.provider = ethers.getDefaultProvider(network);
+    this.waitForConfirmation = waitForConfirmation;
+    this.provider = getProvider(network);
     this.wallet = new ethers.Wallet(privateKey, this.provider);
     this.contract = new ethers.Contract(address, DocumentStoreABI, this.wallet);
   }
 
-  async issue(hash, requireConfirmation = false) {
+  async issue(hash) {
     const receipt = await this.contract.issue(hash);
-    if (requireConfirmation) {
+    if (this.waitForConfirmation) {
       await receipt.wait();
     }
     return receipt.hash;
   }
 
-  async revoke(hash, requireConfirmation = false) {
+  async revoke(hash) {
     const receipt = await this.contract.revoke(hash);
-    if (requireConfirmation) {
+    if (this.waitForConfirmation) {
       await receipt.wait();
     }
     return receipt.hash;
