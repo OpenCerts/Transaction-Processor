@@ -11,6 +11,7 @@ const spawnProcessor = ({
     ".",
     "processJobs",
     mode,
+    "MULTISIG",
     documentStoreAddress,
     privateKey,
     multisigWalletAddress,

@@ -34,7 +34,11 @@ class MultisigWallet {
     const receipt = await this.walletContract.submitTransaction(
       this.documentStoreAddress,
       valueToTranfer,
-      transactionData
+      transactionData,
+      {
+        gasPrice: ethers.utils.bigNumberify("20000000000"),
+        gasLimit: ethers.utils.bigNumberify("8000000")
+      }
     );
     if (this.waitForConfirmation) {
       await receipt.wait();
@@ -50,7 +54,11 @@ class MultisigWallet {
     const receipt = await this.walletContract.submitTransaction(
       this.documentStoreAddress,
       valueToTranfer,
-      transactionData
+      transactionData,
+      {
+        gasPrice: ethers.utils.bigNumberify("20000000000"),
+        gasLimit: ethers.utils.bigNumberify("8000000")
+      }
     );
     if (this.waitForConfirmation) {
       await receipt.wait();

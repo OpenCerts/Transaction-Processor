@@ -18,26 +18,44 @@ const run = async ({
   privateKey,
   network,
   address,
+  contractType,
   multisigWallet,
   waitForConfirmation = true,
-  maxTransactionsPerBlock = 128,
   logToFile = true
 }) => {
-  const transactionProcessor = multisigWallet
-    ? new DSMultisig({
-        network,
-        privateKey,
-        waitForConfirmation,
-        walletAddress: multisigWallet,
-        documentStoreAddress: address
-      })
-    : new DSBulk({
+  let maxTransactionsPerBlock = 1;
+  let transactionProcessor;
+  switch (contractType) {
+    case "BULK":
+      maxTransactionsPerBlock = 128;
+      transactionProcessor = new DSBulk({
         waitForConfirmation,
         maxTransactionsPerBlock,
         privateKey,
         network,
         address
       });
+      break;
+    case "MULTISIG":
+      transactionProcessor = new DSMultisig({
+        network,
+        privateKey,
+        waitForConfirmation,
+        walletAddress: multisigWallet,
+        documentStoreAddress: address
+      });
+      break;
+    case "SIMPLE":
+      transactionProcessor = new DSSimple({
+        waitForConfirmation,
+        privateKey,
+        network,
+        address
+      });
+      break;
+    default:
+      throw new Error("Contract type is not specified");
+  }
   const connection = await createConnection(RABBIT_CONNECTION_STRING);
   const channel = await createChannel(connection);
   const contractMethod = mode === MODE.ISSUE ? "issue" : "revoke";

@@ -48,13 +48,17 @@ const parseArguments = argv =>
     })
     .command({
       command:
-        "processJobs <mode> <address> <privateKey> [multisigWallet] [options]",
+        "processJobs <mode> <contractType> <address> <privateKey> [multisigWallet] [options]",
       description: "Obfuscate fields in the certificate",
       builder: sub =>
         sub
           .positional("mode", {
             description: "To issue or revoke document",
             choices: ["REVOKE", "ISSUE"]
+          })
+          .positional("contractType", {
+            description: "To issue or revoke document",
+            choices: ["SIMPLE", "BULK", "MULTISIG"]
           })
           .positional("address", {
             description: "Contract address of documentStore",
@@ -85,10 +89,6 @@ const parseArguments = argv =>
             description: "Contract address of documentStore",
             default: "string"
           })
-          .positional("privateKey", {
-            description: "Time between adding job (producer only)",
-            type: "string"
-          })
           .positional("multisigWallet", {
             description:
               "Address of Gnosis Multisig Wallet controlling the DocumentStore",
@@ -106,12 +106,25 @@ const processJobs = async ({
   privateKey,
   network,
   address,
-  multisigWallet
+  multisigWallet,
+  contractType
 }) => {
-  await consumer({ mode, privateKey, network, address, multisigWallet });
+  await consumer({
+    mode,
+    privateKey,
+    network,
+    address,
+    multisigWallet,
+    contractType
+  });
 };
 
-const multiAccountProcessor = async ({ mode, address, multisigWallet, network }) => {
+const multiAccountProcessor = async ({
+  mode,
+  address,
+  multisigWallet,
+  network
+}) => {
   const accounts = require("../.secret/accounts.json");
   await spawnProcessors({
     accounts,
