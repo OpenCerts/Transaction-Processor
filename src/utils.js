@@ -1,5 +1,6 @@
 const amqp = require("amqplib/callback_api");
 const axios = require("axios");
+const ethers = require("ethers");
 
 const encodeMessage = messageObject =>
   Buffer.from(JSON.stringify(messageObject));
@@ -42,10 +43,16 @@ const createChannel = connection => {
   });
 };
 
+const getProvider = (network = "ropsten") =>
+  network === "local"
+    ? new ethers.providers.JsonRpcProvider("http://localhost:8545")
+    : ethers.getDefaultProvider(network);
+
 module.exports = {
   getJobsInQueues,
   createChannel,
   createConnection,
   encodeMessage,
-  decodeMessage
+  decodeMessage,
+  getProvider
 };
