@@ -9,7 +9,8 @@ const DSSimple = require("../documentStoreInterfaces/simple");
 const DSBulk = require("../documentStoreInterfaces/bulk");
 // Using Gnosis multisig wallet to manage the first version of the document store
 const DSMultisig = require("../documentStoreInterfaces/simpleMultisig");
-// TBD: Using Gnosis multisig wallet to manage the experimental version of document store
+// Using Gnosis multisig wallet to manage the experimental version of document store
+const DSBulkMultisig = require("../documentStoreInterfaces/bulkMultisig");
 
 const log = debug("consumer");
 
@@ -51,6 +52,17 @@ const run = async ({
         privateKey,
         network,
         address
+      });
+      break;
+    case "BULKMULTISIG":
+      maxTransactionsPerBlock = 128;
+      transactionProcessor = new DSBulkMultisig({
+        network,
+        privateKey,
+        waitForConfirmation,
+        walletAddress: multisigWallet,
+        documentStoreAddress: address,
+        maxTransactionsPerBlock
       });
       break;
     default:

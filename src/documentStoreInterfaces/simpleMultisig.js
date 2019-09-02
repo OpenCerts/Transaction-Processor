@@ -1,6 +1,7 @@
 const ethers = require("ethers");
 const DocumentStoreABI = require("../../abi/DocumentStore.json");
 const GnosisMultisigWalletABI = require("../../abi/GnosisMultisigWallet.json");
+const { getProvider } = require("../utils");
 
 class MultisigWallet {
   constructor({
@@ -14,7 +15,7 @@ class MultisigWallet {
     this.privateKey = privateKey;
     this.walletAddress = walletAddress;
     this.documentStoreAddress = documentStoreAddress;
-    this.provider = ethers.getDefaultProvider(network);
+    this.provider = getProvider(network);
     this.wallet = new ethers.Wallet(privateKey, this.provider);
     this.waitForConfirmation = waitForConfirmation;
 

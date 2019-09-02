@@ -3,6 +3,7 @@ const { spawn } = require("child_process");
 const spawnProcessor = ({
   privateKey,
   mode,
+  contractType,
   multisigWalletAddress,
   documentStoreAddress,
   network
@@ -11,7 +12,7 @@ const spawnProcessor = ({
     ".",
     "processJobs",
     mode,
-    "MULTISIG",
+    contractType,
     documentStoreAddress,
     privateKey,
     multisigWalletAddress,
@@ -44,7 +45,8 @@ const spawnProcessors = ({
   mode,
   multisigWalletAddress,
   documentStoreAddress,
-  network
+  network,
+  contractType
 }) => {
   accounts.forEach(({ privateKey }) => {
     spawnProcessor({
@@ -52,7 +54,8 @@ const spawnProcessors = ({
       mode,
       multisigWalletAddress,
       documentStoreAddress,
-      network
+      network,
+      contractType
     });
   });
 };

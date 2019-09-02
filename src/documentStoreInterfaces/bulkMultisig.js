@@ -1,26 +1,36 @@
 const ethers = require("ethers");
 const DocumentStoreBulkABI = require("../../abi/DocumentStoreBulk.json");
+const GnosisMultisigWalletABI = require("../../abi/GnosisMultisigWallet.json");
 const { getProvider } = require("../utils");
 const Queue = require("better-queue");
 
-class BulkWallet {
+class MultisigWallet {
   constructor({
     network,
     privateKey,
-    address,
+    walletAddress,
+    documentStoreAddress,
     waitForConfirmation,
     maxTransactionsPerBlock
   } = {}) {
     this.network = network;
     this.privateKey = privateKey;
+    this.walletAddress = walletAddress;
+    this.documentStoreAddress = documentStoreAddress;
+    this.maxTransactionsPerBlock = maxTransactionsPerBlock;
     this.provider = getProvider(network);
     this.wallet = new ethers.Wallet(privateKey, this.provider);
+    this.waitForConfirmation = waitForConfirmation;
 
-    this.documentStoreContract = new ethers.Contract(
-      address,
-      DocumentStoreBulkABI,
+    this.walletContract = new ethers.Contract(
+      walletAddress,
+      GnosisMultisigWalletABI,
       this.wallet
     );
+    this.documentStoreInterface = new ethers.utils.Interface(
+      DocumentStoreBulkABI
+    );
+
     this.issueQueue = new Queue(this.processIssueQueue.bind(this), {
       batchSize: maxTransactionsPerBlock,
       batchDelay: 2000
@@ -31,13 +41,18 @@ class BulkWallet {
       batchDelay: 2000
       // batchDelayTimeout: 1000
     });
-    this.waitForConfirmation = waitForConfirmation;
   }
 
   async processIssueQueue(hashesToProcess, callback) {
     try {
-      const receipt = await this.documentStoreContract.bulkIssue(
-        hashesToProcess,
+      const transactionData = this.documentStoreInterface.functions.bulkIssue.encode(
+        [hashesToProcess]
+      );
+      const valueToTranfer = 0;
+      const receipt = await this.walletContract.submitTransaction(
+        this.documentStoreAddress,
+        valueToTranfer,
+        transactionData,
         {
           gasPrice: ethers.utils.bigNumberify("20000000000"),
           gasLimit: ethers.utils.bigNumberify("8000000")
@@ -63,8 +78,14 @@ class BulkWallet {
 
   async processRevokeQueue(hashesToProcess, callback) {
     try {
-      const receipt = await this.documentStoreContract.bulkRevoke(
-        hashesToProcess,
+      const transactionData = this.documentStoreInterface.functions.bulkRevoke.encode(
+        [hashesToProcess]
+      );
+      const valueToTranfer = 0;
+      const receipt = await this.walletContract.submitTransaction(
+        this.documentStoreAddress,
+        valueToTranfer,
+        transactionData,
         {
           gasPrice: ethers.utils.bigNumberify("20000000000"),
           gasLimit: ethers.utils.bigNumberify("8000000")
@@ -89,4 +110,4 @@ class BulkWallet {
   }
 }
 
-module.exports = BulkWallet;
+module.exports = MultisigWallet;
