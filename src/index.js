@@ -58,7 +58,7 @@ const parseArguments = argv =>
           })
           .positional("contractType", {
             description: "To issue or revoke document",
-            choices: ["SIMPLE", "BULK", "MULTISIG"]
+            choices: ["SIMPLE", "BULK", "MULTISIG", "BULKMULTISIG"]
           })
           .positional("address", {
             description: "Contract address of documentStore",
@@ -76,7 +76,7 @@ const parseArguments = argv =>
     })
     .command({
       command:
-        "multiAccountProcessor <mode> <address> <multisigWallet> [options]",
+        "multiAccountProcessor <mode> <contractType> <address> <multisigWallet> [options]",
       description:
         "Use multiple accounts from .secret/accounts.json file to process",
       builder: sub =>
@@ -84,6 +84,10 @@ const parseArguments = argv =>
           .positional("mode", {
             description: "To issue or revoke document",
             choices: ["REVOKE", "ISSUE"]
+          })
+          .positional("contractType", {
+            description: "To issue or revoke document",
+            choices: ["MULTISIG", "BULKMULTISIG"]
           })
           .positional("address", {
             description: "Contract address of documentStore",
@@ -123,12 +127,14 @@ const multiAccountProcessor = async ({
   mode,
   address,
   multisigWallet,
-  network
+  network,
+  contractType
 }) => {
   const accounts = require("../.secret/accounts.json");
   await spawnProcessors({
     accounts,
     mode,
+    contractType,
     multisigWalletAddress: multisigWallet,
     documentStoreAddress: address,
     network

@@ -102,6 +102,63 @@ DEBUG=consumer* node . processJobs REVOKE MULTISIG\
     <DOCUMENT STORE ADDRESS> \
     <PRIVATE KEY> \
     <MULTISIG WALLET ADDRESS>
+    
+```
+
+### MultisigBulkDocumentStore
+
+In the `MultisigBulkDocumentStore` mode, the private key provided to the CLI is for the account that is allowed to send transactions to a [Gnosis Multisig Wallet](https://github.com/gnosis/MultiSigDocumentStore) instance. ISSUE & REVOKE transactions are instead sent to the multisig wallet to be processed. In this mode, we can add many different wallets to the same multisig wallet (with 1 required confirmation) to allow many different wallets to ISSUE and REVOKE documents at the same time. Parallel processing with bulk entries? Sick!
+
+To run the Job Processor to ISSUE documents:
+
+```
+DEBUG=consumer* node . processJobs ISSUE BULKMULTISIG \
+    <DOCUMENT STORE ADDRESS> \
+    <PRIVATE KEY> \
+    <MULTISIG WALLET ADDRESS>
+```
+
+To run the Job Processor to REVOKE documents:
+
+```
+DEBUG=consumer* node . processJobs REVOKE BULKMULTISIG\
+    <DOCUMENT STORE ADDRESS> \
+    <PRIVATE KEY> \
+    <MULTISIG WALLET ADDRESS>
+```
+
+### MultisigBulkDocumentStore on Steroids
+
+The CLI has a feature to run many workers for multisig contract. 
+
+To run the processor to ISSUE documents with the MultisigBulkDocumentStore mode:
+
+```
+DEBUG=consumer* node . multiAccountProcessor ISSUE BULKMULTISIG\
+    <DOCUMENT STORE ADDRESS> \
+    <MULTISIG WALLET ADDRESS>
+```
+
+For MultisigDocument Store:
+
+```
+DEBUG=consumer* node . multiAccountProcessor ISSUE MULTISIG\
+    <DOCUMENT STORE ADDRESS> \
+    <MULTISIG WALLET ADDRESS>
+```
+
+You will need a file in `.secret/accounts.json` that looks like:
+```
+[
+  {
+    "address": "0xADD1",
+    "privateKey": "KEY2"
+  },
+  {
+    "address": "0xADD1",
+    "privateKey": "KEY2"
+  }
+]
 ```
 
 ## Test Results
